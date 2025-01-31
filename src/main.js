@@ -32,7 +32,7 @@ play();
 
 function play() {
   vx = (vx + ax * 0.5) * 0.99;
-  vy = (vy + ay * 0.5) * 0.99;
+  vy = (vy - ay * 0.5) * 0.99;
   vz = (vz + az * 0.5) * 0.99;
 
   pos = [pos[0] + vx, pos[1] + vy, pos[2] + vz];
