@@ -37,4 +37,5 @@ async function baublePlugin() {
 
 export default defineConfig({
     plugins: [baublePlugin()],
+    base: "./"
 });

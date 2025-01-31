@@ -22,7 +22,7 @@
   | radial: $r z 150 2000 :oversample true
   | rotate z ((t / 15) + $t.z)
   | move x (500 * (sin ($t.z + (t / 3) / 2))) y (500 * (cos ($t.z + (t / 3) / 2)))
-  | tile: $t [10000 10000 1500]
+  | tile: $t [10000 10000 2000]
 )
 
 (set background-color black)
@@ -57,14 +57,14 @@
   (return [rex, imy])
 )
 
-# Convert x,y to 3d direction
+# Convert x,y to 3d direction vector
 (gl/defn :vec3 peirceDir [:vec2 v_part]
   (var v_clip [v_part.x, (-1 * v_part.y)])
   (var obj (peirceQ v_clip))
   (var latp (( 2.0 * (atan (sqrt ((obj.x * obj.x) + (obj.y * obj.y))))) - pi / 2))
   (var longd (atan2 obj.y obj.x))
   (var cosbeta (cos latp))
-  (return [(cosbeta * (cos longd)), (cosbeta * (sin longd)), (sin latp) ])
+  (return [(cosbeta * (cos longd)), (cosbeta * (sin longd)), (sin latp) | normalize ])
 )
 
 # Camera
@@ -72,7 +72,7 @@
 (defuniform rotation [0 0])
 (defuniform zoom 1)
 
-(set camera (camera/perspective pos :dir (peirceDir (frag-coord * zoom) | rotate x rotation.y y rotation.x | normalize) :fov 0) | camera/zoom zoom)
+(set camera (camera/perspective pos :dir (peirceDir (frag-coord * zoom | rotate 0.5) | rotate x rotation.y y rotation.x) :fov 0) | camera/zoom zoom)
 
 
 
