@@ -1,0 +1,64 @@
+
+
+
+
+
+# Black and white rings within rings
+
+(torus y 500 10 | shade black
+  | union (ball 20 | shade white | radial x 7 40 | rotate x (t * 0.3) | radial y 15 500)
+  | rotate y (t + ((osc t 100 5 10) * sin ($r * pi / 150))) 
+  | radial: $r z 150 2000 :oversample true
+  | rotate z ((t / 5) + $t.z)
+  | move x (500 * (sin ($t.z + t / 2))) y (500 * (cos ($t.z + t / 2)))
+  | tile: $t [0 0 1500]
+)
+
+# Peirce quincuncial projection functions
+
+# Jackobian Elliptic Function optimised for m = 0.5
+
+(gl/defn :vec3 ellipticJ [:float u] 
+  (var phi (13.555409356703667 * u))
+  (var phi (((asin (sin phi * 4.864626782919487e-11)) + phi) / 2) )
+  (var phi (((asin (sin phi * 0.000013949369424111808)) + phi) / 2) )
+  (var phi ((asin (sin phi * 0.007469666729509522)) + phi / 2) )
+  (var b ((asin (sin phi * 0.17157287525380988)) + phi / 2) )
+  (var bt (cos b))
+  (return [(sin b), bt, (bt / (cos (b - phi)))])
+)
+
+(gl/def ke 1.85407467730137)
+
+# Convert x,y to sherical x,y
+(gl/defn :vec2 peirceQ [:vec2 v_in]
+  (var e (ellipticJ (ke * (v_in.x - 1.0))))  
+  (if (< (abs v_in.y) 0.0001)
+    (return [e.y, 0.0])
+  )
+  (var e1 (ellipticJ (ke * v_in.y)))
+  (var delta ((e1.y * e1.y) + (0.5 * e.x * e.x * e1.x * e1.x)))
+  (var rex ((e.y * e1.y) / delta))
+  (var imy ((e.x * e.z * e1.x * e1.z) / (-1 * delta)))
+  (return [rex, imy])
+)
+
+# Convert x,y to 3d direction
+(gl/defn :vec3 peirceDir [:vec2 v_part]
+  (var v_clip [v_part.x, (-1 * v_part.y)])
+  (var obj (peirceQ v_clip))
+  (var latp (( 2.0 * (atan (sqrt ((obj.x * obj.x) + (obj.y * obj.y))))) - pi / 2))
+  (var longd (atan2 obj.y obj.x))
+  (var cosbeta (cos latp))
+  (return [(cosbeta * (cos longd)), (cosbeta * (sin longd)), (sin latp) ])
+)
+
+# Camera
+(defuniform pos [0 0 0])
+(defuniform rotation [0 0])
+(defuniform zoom 1)
+
+(set camera (camera/perspective pos :dir (peirceDir (frag-coord * zoom) | rotate x rotation.y y rotation.x | normalize) :fov 0) | camera/zoom zoom)
+
+
+
