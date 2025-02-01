@@ -2,21 +2,9 @@
 
 # Black and white rings within rings
 
-#(torus y 500 10 | shade black
-#  | union (ball 15 | shade (ss depth 2000 20000 white graydient) | radial x 7 40 | rotate x (t * 3) | radial y 15 500)
-#  | rotate y ((t / 3) + ((osc t 100 5 10) * sin ($r * pi / 150))) 
-#  | radial: $r z 150 2000 :oversample true
-#  | rotate z ((t / 15) + $t.z)
-#  | move x (500 * (sin ($t.z + (t / 3) / 2))) y (500 * (cos ($t.z + (t / 3) / 2)))
-#  | tile: $t [0 0 1500]
-#)
-
-
 (torus y 500 10 | shade black
   | union (ball 15 
     | shade (ss depth 2000 20000 white (hsv 0 0 0)) 
-    # | shade :f blinn-phong (ss depth 2000 20000 white black) :s 0.5 :g 20
-    
     | radial x 7 40 | rotate x (t * 3) | radial y 15 500)
   | rotate y ((t / 3) + ((osc t 100 5 10) * sin ($r * pi / 150))) 
   | radial: $r z 150 2000 :oversample true
