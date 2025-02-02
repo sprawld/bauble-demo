@@ -1,10 +1,17 @@
 
 
+(defn fog [light color] (
+    dot normal light.direction * light.brightness * 
+    light.color * color * (ss depth 2000 30000 1 0.01)
+  )
+)
+
+
 # Black and white rings within rings
 
-(torus y 500 10 | shade black
+(torus y 500 10 | shade black :f fog
   | union (ball 15 
-    | shade (ss depth 2000 20000 white (hsv 0 0 0)) 
+    | shade white :f fog
     | radial x 7 40 | rotate x (t * 3) | radial y 15 500)
   | rotate y ((t / 3) + ((osc t 100 5 10) * sin ($r * pi / 150))) 
   | radial: $r z 150 2000 :oversample true
@@ -32,7 +39,7 @@
 
 (gl/def ke 1.85407467730137)
 
-# Convert x,y to sherical x,y
+# Convert x,y to spherical x,y
 (gl/defn :vec2 peirceQ [:vec2 v_in]
   (var e (ellipticJ (ke * (v_in.x - 1.0))))  
   (if (< (abs v_in.y) 0.0001)
@@ -61,6 +68,4 @@
 (defuniform zoom 1)
 
 (set camera (camera/perspective pos :dir (peirceDir (frag-coord * zoom | rotate 0.5) | rotate x rotation.y y rotation.x) :fov 0) | camera/zoom zoom)
-
-
 
